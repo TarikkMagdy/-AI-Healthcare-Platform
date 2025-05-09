@@ -12,11 +12,7 @@ from torchvision.models import resnet101, ResNet101_Weights
 import torch.nn as nn
 import time
 
-# Note: st.set_page_config is usually called once in the main app file.
-# If you need page-specific configurations that can't be handled globally,
-# you might use it, but be aware of potential overrides.
 
-# Custom CSS (Consider if this should be global or page-specific using more targeted selectors)
 st.markdown("""
     <style>
         /* Applying to elements within this page if possible, or ensure selectors are specific */
@@ -29,21 +25,17 @@ st.markdown("""
 # Load the dataset
 @st.cache_data
 def load_skincare_data():
-    # Assuming AI_Clinic_App.py is run from AI_Clinic_Project/
-    # Paths are relative to the root project directory.
     try:
         df = pd.read_csv("data/face_products2.csv")
         df["price"] = df["price"].astype(str).str.replace("£", "", regex=False).astype(float)
-        return df.copy() # Return a copy to prevent mutation issues with caching
+        return df.copy() 
     except FileNotFoundError:
         st.error("Skincare product data file (data/face_products2.csv) not found. Please check the path.")
         return pd.DataFrame() # Return empty DataFrame
 
 df_products_full = load_skincare_data()
 
-# Sidebar - User Inputs (Appears on this page when selected)
-st.sidebar.title("🧴 Skincare Analysis Filters") # Sidebar title will be for the current page
-# Check if df_products_full is not empty before using its columns
+st.sidebar.title("🧴 Skincare Analysis Filters") 
 if not df_products_full.empty:
     manual_skin_type_options = ["Auto Detect", "Oily", "Dry", "Normal"] + list(df_products_full['Skin Type'].unique())
     manual_skin_type_options = sorted(list(set(option for option in manual_skin_type_options if pd.notna(option)))) # Unique and sorted
@@ -68,10 +60,9 @@ def load_skin_models():
         skin_type_model_loaded = torch.load('models/skin_type_model_complete.pth', map_location=torch.device('cpu'))
         skin_type_model_loaded.eval()
 
-        concern_model_loaded = resnet101(weights=None) # Load architecture, then weights
+        concern_model_loaded = resnet101(weights=None) 
         num_ftrs = concern_model_loaded.fc.in_features
-        concern_model_loaded.fc = nn.Linear(num_ftrs, 4) # Adjust output features to 4
-        # Path relative to the root project directory
+        concern_model_loaded.fc = nn.Linear(num_ftrs, 4) 
         concern_model_loaded.load_state_dict(torch.load("models/best_model_concern___.pth", map_location=torch.device('cpu')))
         concern_model_loaded.eval()
         return skin_type_model_loaded, concern_model_loaded
@@ -85,11 +76,9 @@ def load_skin_models():
 
 skin_type_model, concern_model = load_skin_models()
 
-# Prepare product data for recommendation (only if models and data loaded)
 if not df_products_full.empty and skin_type_model and concern_model:
     skincare_products_df = df_products_full.dropna(subset=['Concern List_']).copy()
     skincare_products_df['Skin Type'] = skincare_products_df['Skin Type'].fillna('Normal')
-    # Price already converted in load_skincare_data
 
     # One-hot encoding for skin type
     encoder_skin = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
@@ -100,7 +89,7 @@ if not df_products_full.empty and skin_type_model and concern_model:
     tfidf_vectorizer = TfidfVectorizer(stop_words='english')
     ingredients_tfidf = tfidf_vectorizer.fit_transform(skincare_products_df['ingredients'].fillna(''))
 else:
-    skincare_products_df = pd.DataFrame() # Ensure it's defined for later checks
+    skincare_products_df = pd.DataFrame()
 
 
 # Image Preprocessing
@@ -121,10 +110,10 @@ def recommend_products(user_skin_type, user_concern, current_ingredients_tfidf, 
     user_skin_type_encoded = current_encoder_skin.transform([[user_skin_type]])
 
     all_concerns_list = sorted(list(current_skincare_products_df['Concern List_'].str.split(',\s*').explode().str.strip().unique()))
-    if not all_concerns_list: # Handle case where no concerns are in the dataset
-        all_concerns_list = ['Acne', 'Bags', 'Enlarged pores', 'Redness'] # Fallback
+    if not all_concerns_list: 
+        all_concerns_list = ['Acne', 'Bags', 'Enlarged pores', 'Redness']
 
-    user_concern_vector_ingredients = current_tfidf_vectorizer.transform([user_concern]) # Use the concern text directly for TF-IDF matching against ingredients
+    user_concern_vector_ingredients = current_tfidf_vectorizer.transform([user_concern]) 
 
     # Similarity for skin type (one-hot)
     skin_type_similarity = cosine_similarity(user_skin_type_encoded, current_skin_type_df)
@@ -133,7 +122,6 @@ def recommend_products(user_skin_type, user_concern, current_ingredients_tfidf, 
     concern_similarity_ingredients = cosine_similarity(user_concern_vector_ingredients, current_ingredients_tfidf)
     
     # Combine similarities (you can adjust weights)
-    # Ensuring both similarity arrays are 1D for proper broadcasting or element-wise operations
     final_similarity = (skin_type_similarity.flatten() * 0.5) + (concern_similarity_ingredients.flatten() * 0.5)
 
     # Get top recommendations
@@ -188,7 +176,7 @@ if uploaded_file and skin_type_model and concern_model and not skincare_products
     # Pass all necessary data to the recommendation function
     recommended_products_list = recommend_products(
         final_skin_type,
-        predicted_concern, # Or a combination/user-selected concern
+        predicted_concern, 
         ingredients_tfidf,
         skincare_products_df,
         skin_type_df,
