@@ -215,7 +215,6 @@ with st.expander("🔍 12 Key Questions (Start Here)", expanded=True):
         > **Smoking cessation + mid-life BMI control** deliver 80% of preventable benefits.  
         > *Action: Focus resources on these two levers.*
         """)
-# New: 15 Additional Key Insights Sections
 
 # Question 6
 with st.container():
