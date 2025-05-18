@@ -1,6 +1,7 @@
 
 # AI Clinic Digital Health Hub
-
+### 🏠 Homepage UI
+![Homepage UI](images/homepage.jpg)
 ## Overview
 
 The **AI Clinic Digital Health Hub** is a comprehensive AI-powered platform designed to enhance healthcare diagnostics and patient support. It integrates several predictive and classification models for heart disease risk, pneumonia detection, mental health support, skin condition diagnosis, and personalized skincare product recommendations.
@@ -52,8 +53,7 @@ The **AI Clinic Digital Health Hub** is a comprehensive AI-powered platform desi
 
 ## 📸 Screenshots
 
-### 🏠 Homepage UI
-![Homepage UI](images/homepage.jpg)
+
 
 ### 🧭 Dashboard Overview
 ![Dashboard Overview](images/dashboard.jpg)
