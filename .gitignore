@@ -1,2 +1,4 @@
-models/
+models/skin_type_model_complete.pth
+models/best_model_concern___.pth
 data/face_products2.csv
+.gitignore
