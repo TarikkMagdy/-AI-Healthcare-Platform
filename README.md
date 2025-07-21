@@ -1,1 +1,0 @@
-# -AI-Healthcare-Platform
